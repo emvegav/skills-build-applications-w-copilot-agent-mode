@@ -24,3 +24,4 @@ jobs:
           cache: "npm"
       - name: Install JavaScript dependencies
         run: npm ci
+        working-directory: octofit-tracker/frontend
