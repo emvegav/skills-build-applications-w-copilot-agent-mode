@@ -36,6 +36,12 @@ class Command(BaseCommand):
         # Create Workouts
         Workout.objects.create(name='Morning Cardio', description='A quick morning cardio routine')
         Workout.objects.create(name='Strength Training', description='Full body strength workout')
+        Workout.objects.create(
+            name='Manga Maniacs',
+            description='Explore the fantastic stories of the most interesting characters from Japanese Manga (graphic novels).',
+            schedule='Tuesdays at 7pm',
+            max_attendance=15,
+        )
 
         # Create Leaderboard
         Leaderboard.objects.create(user=users[0], score=1000)

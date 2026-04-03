@@ -21,6 +21,8 @@ class Activity(models.Model):
 class Workout(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField()
+    schedule = models.CharField(max_length=100, blank=True, default='')
+    max_attendance = models.PositiveIntegerField(null=True, blank=True)
 
 class Leaderboard(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
