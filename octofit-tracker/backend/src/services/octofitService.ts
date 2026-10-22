@@ -87,8 +87,32 @@ export async function getLeaderboard() {
   });
 }
 
-export async function suggestWorkouts(_userEmail: string) {
-  return Workout.find().limit(1).lean();
+export async function suggestWorkouts(userEmail: string) {
+  const user = await User.findOne({ email: userEmail }).lean();
+  if (!user) {
+    throw Object.assign(new Error('User not found'), { status: 404 });
+  }
+
+  const [activity] = await Activity.find({ user: user._id }).sort({ occurredAt: -1 }).limit(1).lean();
+  const activityFocus: Record<string, string> = {
+    run: 'endurance',
+    cycle: 'endurance',
+    walk: 'endurance',
+    strength: 'strength',
+  };
+  const focus = (activity && activityFocus[activity.type.toLowerCase()]) || user.fitnessGoal;
+  const workouts = await Workout.find().lean();
+
+  return workouts
+    .map((workout) => ({
+      ...workout,
+      reason: activity
+        ? `Suggested based on your ${activity.type} activity and ${focus} focus.`
+        : `Suggested to support your ${focus} fitness goal.`,
+      matchesFocus: workout.focus.toLowerCase() === focus.toLowerCase(),
+    }))
+    .sort((first, second) => Number(second.matchesFocus) - Number(first.matchesFocus))
+    .map(({ matchesFocus: _matchesFocus, ...workout }) => workout);
 }
 
 export { User };
