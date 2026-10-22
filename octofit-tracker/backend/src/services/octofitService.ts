@@ -74,7 +74,17 @@ export async function createTeam(input: unknown) {
 }
 
 export async function getLeaderboard() {
-  return [];
+  const totals = await Activity.aggregate<{ _id: mongoose.Types.ObjectId; totalPoints: number }>([
+    { $group: { _id: '$team', totalPoints: { $sum: '$points' } } },
+    { $sort: { totalPoints: -1, _id: 1 } },
+  ]);
+  const teams = await Team.find({ _id: { $in: totals.map(({ _id }) => _id) } }).select('name').lean();
+  const teamNames = new Map(teams.map((team) => [team._id.toString(), team.name]));
+
+  return totals.flatMap(({ _id, totalPoints }, index) => {
+    const teamName = teamNames.get(_id.toString());
+    return teamName ? [{ teamName, totalPoints, rank: index + 1 }] : [];
+  });
 }
 
 export async function suggestWorkouts(_userEmail: string) {
